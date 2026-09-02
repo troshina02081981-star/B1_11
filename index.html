@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Калькулятор программ обучения</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f2efe9;
+      font-family: 'Segoe UI', system-ui, -apple-system, 'Inter', sans-serif;
+      padding: 20px;
+    }
+
+    /* премиальная карточка */
+    .card {
+      max-width: 600px;
+      width: 100%;
+      background: #FDFBF7;
+      border-radius: 48px;
+      padding: 48px 40px 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.02);
+      transition: box-shadow 0.2s;
+      text-align: center;
+    }
+
+    .card h2 {
+      font-size: 2rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: #2c2b28;
+      margin-bottom: 32px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      padding-bottom: 18px;
+    }
+
+    /* ползунок */
+    .slider-container {
+      padding: 0 6px;
+      margin-bottom: 32px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 3px;
+      border-radius: 4px;
+      background: #d9d4cc;
+      outline: none;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #D4AF37;
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3), 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 2px solid #FDFBF7;
+      transition: box-shadow 0.2s;
+      margin-top: -10px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #D4AF37;
+      border: 2px solid #FDFBF7;
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 3px;
+      background: #d9d4cc;
+      border-radius: 4px;
+    }
+
+    input[type="range"]::-ms-track {
+      height: 3px;
+      background: #d9d4cc;
+      border-radius: 4px;
+      border: none;
+      color: transparent;
+    }
+
+    input[type="range"]::-ms-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #D4AF37;
+      border: 2px solid #FDFBF7;
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+    }
+
+    /* плашка статуса */
+    .status-badge {
+      display: inline-block;
+      padding: 12px 32px;
+      border-radius: 40px;
+      background: #eae7e0;
+      color: #5a5854;
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      margin-bottom: 20px;
+      min-width: 180px;
+    }
+
+    .status-badge.gray {
+      background: #ece9e3;
+      color: #6b6964;
+    }
+
+    .status-badge.green {
+      background: #e3efe3;
+      color: #1f6b3b;
+    }
+
+    .status-badge.gold {
+      background: #f4eddb;
+      color: #8f7b3a;
+      box-shadow: 0 4px 16px rgba(212, 175, 55, 0.12);
+    }
+
+    /* подсказка */
+    .hint {
+      font-size: 1rem;
+      color: #6b6964;
+      background: rgba(212, 175, 55, 0.04);
+      padding: 14px 18px;
+      border-radius: 40px;
+      display: inline-block;
+      margin-top: 8px;
+      border: 1px solid rgba(212, 175, 55, 0.08);
+      backdrop-filter: blur(2px);
+    }
+
+    .hours-label {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #3d3b37;
+      margin: 16px 0 8px;
+      letter-spacing: 0.01em;
+    }
+
+    .hours-label strong {
+      font-weight: 600;
+      color: #2c2b28;
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      font-size: 0.85rem;
+      color: #a6a29a;
+      border-top: 1px solid #f0ede7;
+      padding-top: 20px;
+    }
+
+    .footer-note span {
+      color: #D4AF37;
+      font-weight: 400;
+    }
+
+    /* адаптив */
+    @media (max-width: 480px) {
+      .card {
+        padding: 32px 20px 30px;
+      }
+      .card h2 {
+        font-size: 1.6rem;
+      }
+      .status-badge {
+        font-size: 1.2rem;
+        padding: 10px 24px;
+        min-width: 140px;
+      }
+      .hint {
+        font-size: 0.9rem;
+        padding: 12px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Объем программы</h2>
+
+    <div class="slider-container">
+      <input type="range" id="hoursSlider" min="0" max="300" value="0" step="1">
+    </div>
+
+    <div class="hours-label">
+      <strong id="hoursDisplay">0</strong> часов
+    </div>
+
+    <div id="statusBadge" class="status-badge gray">Выберите часы</div>
+
+    <div id="hintText" class="hint">—</div>
+
+    <div class="footer-note">
+      <span>✦</span> премиальный подход к обучению
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const slider = document.getElementById('hoursSlider');
+      const hoursDisplay = document.getElementById('hoursDisplay');
+      const statusBadge = document.getElementById('statusBadge');
+      const hintText = document.getElementById('hintText');
+
+      // вспомогательная функция для обновления UI
+      function updateUI(value) {
+        const hours = Number(value);
+        hoursDisplay.textContent = hours;
+
+        // сбросим классы
+        statusBadge.classList.remove('gray', 'green', 'gold');
+
+        let status = '';
+        let hint = '';
+
+        if (hours === 0) {
+          status = 'Выберите часы';
+          statusBadge.classList.add('gray');
+          hint = 'Укажите продолжительность, чтобы увидеть тип программы';
+        } else if (hours >= 1 && hours <= 15) {
+          status = 'Микрокурс';
+          statusBadge.classList.add('gray');
+          hint = 'Удостоверение о прохождении микрокурса (сертификат)';
+        } else if (hours >= 16 && hours <= 249) {
+          status = 'Повышение квалификации';
+          statusBadge.classList.add('green');
+          hint = 'Удостоверение о повышении квалификации';
+        } else if (hours >= 250) {
+          status = 'Профессиональная переподготовка';
+          statusBadge.classList.add('gold');
+          hint = 'Диплом о профессиональной переподготовке';
+        }
+
+        statusBadge.textContent = status;
+        hintText.textContent = hint;
+
+        // дополнительный штрих: меняем фон ползунка (эстетика)
+        const percent = (hours / 300) * 100;
+        const gradient = `linear-gradient(to right, #D4AF37 0%, #D4AF37 ${percent}%, #d9d4cc ${percent}%, #d9d4cc 100%)`;
+        slider.style.background = gradient;
+      }
+
+      // событие при движении
+      slider.addEventListener('input', function(e) {
+        const val = parseInt(e.target.value, 10);
+        updateUI(val);
+      });
+
+      // инициализация (0 часов)
+      // задаём начальный градиент (0% золота)
+      slider.style.background = 'linear-gradient(to right, #D4AF37 0%, #d9d4cc 0%, #d9d4cc 100%)';
+      updateUI(0);
+
+      // дополнительно: синхронизация при загрузке, если браузер восстановит значение
+      window.addEventListener('load', function() {
+        const val = parseInt(slider.value, 10);
+        updateUI(val);
+      });
+    })();
+  </script>
+</body>
+</html>
