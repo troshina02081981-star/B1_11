@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Интерактив 1. Перечень газоопасных работ</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #eef3fa;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 1.5rem 0.8rem;
+      min-height: 100vh;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 780px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 8px 32px rgba(0, 20, 40, 0.08);
+      padding: 1.4rem 1.6rem 1.8rem;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      font-weight: 650;
+      color: #0b1f3b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0.1rem;
+    }
+    .badge {
+      font-size: 0.65rem;
+      background: #dce6f5;
+      padding: 0.05rem 0.7rem;
+      border-radius: 30px;
+      color: #1f4870;
+      font-weight: 600;
+    }
+
+    .subhead {
+      background: #edf4fe;
+      padding: 0.4rem 1rem;
+      border-radius: 14px;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      color: #1a3552;
+      border-left: 4px solid #2a6f97;
+      margin: 0.4rem 0 1rem 0;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .task-item {
+      background: #fafcff;
+      border-radius: 12px;
+      border: 1.5px solid #e1ebf6;
+      padding: 0.4rem 0.7rem 0.4rem 0.9rem;
+      transition: border 0.15s, background 0.1s;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.3rem 0.6rem;
+    }
+
+    .task-item .t-text {
+      font-size: 0.85rem;
+      color: #0b1f33;
+      flex: 1 1 200px;
+      line-height: 1.3;
+    }
+
+    .task-item .t-num {
+      font-weight: 600;
+      color: #2a6f97;
+      font-size: 0.8rem;
+      min-width: 24px;
+    }
+
+    .task-item .options {
+      display: flex;
+      gap: 0.2rem;
+      flex-wrap: wrap;
+    }
+
+    .task-item .options label {
+      display: flex;
+      align-items: center;
+      gap: 0.15rem;
+      font-size: 0.75rem;
+      color: #1b4470;
+      cursor: pointer;
+      padding: 0.1rem 0.6rem;
+      border-radius: 20px;
+      border: 1.5px solid transparent;
+      transition: 0.08s;
+      background: #f0f5fc;
+      font-weight: 500;
+    }
+
+    .task-item .options label:hover {
+      background: #dce8f5;
+    }
+
+    .task-item .options input[type="radio"] {
+      display: none;
+    }
+
+    .task-item .options label.selected-yes {
+      background: #d7eade;
+      border-color: #1e8e3e;
+    }
+    .task-item .options label.selected-no {
+      background: #fde0e0;
+      border-color: #c72a2a;
+    }
+
+    .task-item.correct {
+      border-color: #1e8e3e;
+      background: #eef9f2;
+    }
+    .task-item.wrong {
+      border-color: #c72a2a;
+      background: #fff0f0;
+    }
+    .task-item.missed {
+      border-color: #d4a017;
+      background: #fef8e7;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.5rem 0 0.8rem 0;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn {
+      background: white;
+      border: 1px solid #c7d9ed;
+      padding: 0.25rem 1.2rem;
+      border-radius: 30px;
+      font-weight: 600;
+      color: #1b4470;
+      cursor: pointer;
+      transition: 0.1s;
+      font-size: 0.8rem;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-primary {
+      background: #1a5f8b;
+      border: 1px solid #1a5f8b;
+      color: white;
+      box-shadow: 0 3px 8px rgba(21, 80, 120, 0.15);
+    }
+    .btn-primary:hover {
+      background: #0e4a70;
+    }
+    .btn-outline:hover {
+      background: #e9f0fa;
+    }
+    .btn-success {
+      background: #1e8e3e;
+      border: 1px solid #1e8e3e;
+      color: white;
+    }
+    .btn-success:hover {
+      background: #157a33;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .banner {
+      margin-top: 0.6rem;
+      padding: 0.6rem 1rem;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: none;
+      border: 1px solid;
+      line-height: 1.5;
+    }
+    .banner.success {
+      background: #e1f5e8;
+      border-color: #1f8b4c;
+      color: #0a4628;
+      display: block;
+    }
+    .banner.fail {
+      background: #fde9e9;
+      border-color: #b33c3c;
+      color: #712b2b;
+      display: block;
+    }
+
+    .results-block {
+      margin-top: 0.6rem;
+      padding: 0.6rem 1rem 0.8rem;
+      background: #f2f8fe;
+      border-radius: 14px;
+      border: 1px solid #d6e5f5;
+      display: none;
+    }
+    .results-block.show {
+      display: block;
+    }
+    .results-block h4 {
+      font-size: 0.85rem;
+      color: #0b2a44;
+      margin-bottom: 0.3rem;
+    }
+    .results-block ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .results-block ul li {
+      font-size: 0.8rem;
+      padding: 0.15rem 0 0.15rem 1.2rem;
+      position: relative;
+      color: #1a3552;
+      line-height: 1.4;
+    }
+    .results-block ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #1a5f8b;
+      font-weight: 700;
+    }
+    .results-block ul li.correct-item::before {
+      content: "✅";
+    }
+    .results-block ul li.wrong-item::before {
+      content: "❌";
+    }
+    .results-block ul li.missed-item::before {
+      content: "⚠️";
+    }
+
+    .fnp-link {
+      color: #0059b3;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .fnp-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 0.8rem;
+      }
+      .task-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.2rem;
+        padding: 0.4rem 0.6rem;
+      }
+      .task-item .options {
+        justify-content: flex-start;
+      }
+      .btn-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="app">
+    <h1>
+      <span>📋 Перечень газоопасных работ</span>
+      <span class="badge">тренажёр</span>
+    </h1>
+    <div class="subhead">
+      <strong>Задание:</strong> Отметьте, какие из перечисленных работ относятся к газоопасным, а какие — нет. 
+      После проверки вы увидите правильные ответы и пояснения.
+    </div>
+
+    <div id="taskContainer">
+      <!-- рендерится JS -->
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" id="checkBtn">✅ Проверить</button>
+      <button class="btn btn-outline" id="resetBtn">🔄 Сбросить</button>
+    </div>
+
+    <div id="banner" class="banner"></div>
+
+    <div id="resultsBlock" class="results-block">
+      <h4>📌 Результаты:</h4>
+      <ul id="resultsList"></ul>
+    </div>
+
+  </div>
+
+  <script>
+    (function() {
+      // ---- данные ----
+      const tasks = [
+        { id: 1, text: 'Ремонт и очистка внутренней поверхности ёмкостей, резервуаров, цистерн', isGas: true, explanation: 'Работы внутри ёмкостей требуют оформления наряда-допуска (п. 43 ФНП № 528)' },
+        { id: 2, text: 'Замена лампочки в офисном помещении', isGas: false, explanation: 'Не относится к газоопасным работам — нет риска взрыва, отравления или загазованности' },
+        { id: 3, text: 'Ремонт и замена трубопроводов, арматуры, оборудования под давлением', isGas: true, explanation: 'Работы на газопроводах и оборудовании под давлением — газоопасные (п. 14 ФНП № 528)' },
+        { id: 4, text: 'Уборка рабочего места, мытьё полов', isGas: false, explanation: 'Не относится к газоопасным работам — отсутствуют вредные и опасные факторы' },
+        { id: 5, text: 'Работы в колодцах, тоннелях, камерах, коллекторах и других замкнутых пространствах', isGas: true, explanation: 'Замкнутые пространства требуют оформления наряда-допуска (п. 43 ФНП № 528)' },
+        { id: 6, text: 'Покраска стен в производственном цехе (водоэмульсионной краской)', isGas: false, explanation: 'Не относится к газоопасным работам — нет риска образования взрывоопасной или токсичной среды' },
+        { id: 7, text: 'Огневые работы (газовая сварка, резка, пайка) на газоопасных объектах', isGas: true, explanation: 'Огневые работы на газоопасных объектах — классический пример газоопасных работ (п. 14 ФНП № 528)' },
+        { id: 8, text: 'Пуск газа в газопроводы после ремонта или консервации', isGas: true, explanation: 'Пуск газа — газоопасная работа, требует наряда-допуска (п. 14 ФНП № 528)' },
+        { id: 9, text: 'Работа с вредными веществами 1-2 класса опасности', isGas: true, explanation: 'Работы с веществами высокой токсичности — газоопасные (п. 14 ФНП № 528)' },
+        { id: 10, text: 'Распечатка документов на принтере', isGas: false, explanation: 'Не относится к газоопасным работам — отсутствуют риски, указанные в ФНП № 528' },
+        { id: 11, text: 'Ремонт газового оборудования без отключения', isGas: true, explanation: 'Ремонт газового оборудования без отключения — грубое нарушение, работа газоопасная (п. 14 ФНП № 528)' },
+        { id: 12, text: 'Проведение планового инструктажа с персоналом в кабинете', isGas: false, explanation: 'Не относится к газоопасным работам — проведение инструктажа не связано с рисками' }
+      ];
+
+      // ---- DOM ----
+      const container = document.getElementById('taskContainer');
+      const checkBtn = document.getElementById('checkBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const banner = document.getElementById('banner');
+      const resultsBlock = document.getElementById('resultsBlock');
+      const resultsList = document.getElementById('resultsList');
+
+      let currentResults = [];
+
+      // ---- рендер ----
+      function renderTasks() {
+        let html = '<div class="task-list">';
+        tasks.forEach((t, idx) => {
+          html += `
+            <div class="task-item" data-id="${t.id}" id="task-${t.id}">
+              <span class="t-num">${idx+1}.</span>
+              <span class="t-text">${t.text}</span>
+              <div class="options">
+                <label data-value="yes" class="opt-yes">
+                  <input type="radio" name="task${t.id}" value="yes" /> <span>Газоопасная</span>
+                </label>
+                <label data-value="no" class="opt-no">
+                  <input type="radio" name="task${t.id}" value="no" /> <span>Не газоопасная</span>
+                </label>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+
+        // обработчики для подсветки выбранных опций
+        document.querySelectorAll('.task-item input[type="radio"]').forEach(radio => {
+          radio.addEventListener('change', function() {
+            const item = this.closest('.task-item');
+            const labels = item.querySelectorAll('.options label');
+            labels.forEach(lbl => {
+              lbl.classList.remove('selected-yes', 'selected-no');
+            });
+            const parentLabel = this.closest('label');
+            if (parentLabel) {
+              const val = parentLabel.dataset.value;
+              if (val === 'yes') parentLabel.classList.add('selected-yes');
+              else if (val === 'no') parentLabel.classList.add('selected-no');
+            }
+            // сбросить статус
+            item.classList.remove('correct', 'wrong', 'missed');
+          });
+        });
+      }
+
+      // ---- сбор ответов ----
+      function getAnswers() {
+        const results = [];
+        tasks.forEach(t => {
+          const el = document.querySelector(`input[name="task${t.id}"]:checked`);
+          const answer = el ? el.value : null;
+          results.push({ id: t.id, answer: answer, isGas: t.isGas, text: t.text, explanation: t.explanation });
+        });
+        return results;
+      }
+
+      // ---- проверка ----
+      function checkAnswers() {
+        const results = getAnswers();
+        currentResults = results;
+
+        const allAnswered = results.every(r => r.answer !== null);
+        if (!allAnswered) {
+          banner.className = 'banner fail';
+          banner.innerHTML = '⚠️ Ответьте на все вопросы перед проверкой.';
+          resultsBlock.classList.remove('show');
+          return;
+        }
+
+        let correctCount = 0;
+        let wrongCount = 0;
+        let missedCount = 0;
+
+        // подсветка каждого задания
+        results.forEach(r => {
+          const item = document.getElementById(`task-${r.id}`);
+          if (!item) return;
+          item.classList.remove('correct', 'wrong', 'missed');
+
+          const isCorrect = (r.answer === 'yes' && r.isGas) || (r.answer === 'no' && !r.isGas);
+          if (isCorrect) {
+            item.classList.add('correct');
+            correctCount++;
+          } else {
+            item.classList.add('wrong');
+            wrongCount++;
+          }
+        });
+
+        // формируем список с пояснениями
+        let listHtml = '';
+        results.forEach(r => {
+          const isCorrect = (r.answer === 'yes' && r.isGas) || (r.answer === 'no' && !r.isGas);
+          const userAnswer = r.answer === 'yes' ? 'Газоопасная' : 'Не газоопасная';
+          const correctAnswer = r.isGas ? 'Газоопасная' : 'Не газоопасная';
+          const statusClass = isCorrect ? 'correct-item' : 'wrong-item';
+          const icon = isCorrect ? '✅' : '❌';
+          listHtml += `
+            <li class="${statusClass}">
+              <strong>${r.text}</strong><br>
+              <span style="font-size:0.75rem; color:#4a6a8a;">
+                Ваш ответ: ${userAnswer} | Правильно: ${correctAnswer}
+                ${!isCorrect ? `<br>⚠️ ${r.explanation}` : ''}
+              </span>
+            </li>
+          `;
+        });
+
+        resultsList.innerHTML = listHtml;
+        resultsBlock.classList.add('show');
+
+        // баннер
+        const allCorrect = wrongCount === 0;
+        if (allCorrect) {
+          banner.className = 'banner success';
+          banner.innerHTML = `✅ <strong>Отлично!</strong> Вы правильно определили все ${tasks.length} работ.`;
+        } else {
+          banner.className = 'banner fail';
+          banner.innerHTML = `❌ <strong>Есть ошибки.</strong> Правильно: ${correctCount} из ${tasks.length}. Ознакомьтесь с пояснениями ниже.`;
+        }
+
+        // прокрутка к результатам
+        resultsBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      // ---- сброс ----
+      function resetAll() {
+        document.querySelectorAll('.task-item input[type="radio"]').forEach(r => r.checked = false);
+        document.querySelectorAll('.task-item').forEach(item => {
+          item.classList.remove('correct', 'wrong', 'missed');
+        });
+        document.querySelectorAll('.options label').forEach(lbl => {
+          lbl.classList.remove('selected-yes', 'selected-no');
+        });
+        banner.className = 'banner';
+        banner.innerHTML = '';
+        resultsBlock.classList.remove('show');
+        resultsList.innerHTML = '';
+        currentResults = [];
+      }
+
+      // ---- инициализация ----
+      renderTasks();
+
+      checkBtn.addEventListener('click', checkAnswers);
+      resetBtn.addEventListener('click', resetAll);
+
+    })();
+  </script>
+
+</body>
+</html>
