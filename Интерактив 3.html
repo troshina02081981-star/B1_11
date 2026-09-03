@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Интерактив 3 · Работы внутри емкости</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: #eef3fa;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.2rem;
+    }
+    .card {
+      max-width: 780px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 36px;
+      box-shadow: 0 12px 48px rgba(0, 20, 40, 0.10);
+      padding: 1.6rem 1.8rem 2rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 650;
+      color: #0b1f3b;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.2rem;
+    }
+    .badge-step {
+      background: #dce6f5;
+      border-radius: 30px;
+      padding: 0.1rem 0.9rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #1f4870;
+    }
+    .subhead {
+      background: #edf4fe;
+      padding: 0.7rem 1.2rem;
+      border-radius: 18px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: #1a3552;
+      border-left: 5px solid #2a6f97;
+      margin: 0.5rem 0 1rem 0;
+    }
+    /* stepper */
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+      gap: 0.2rem;
+    }
+    .step-dot {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #7a8fa8;
+      background: #eef3fa;
+      padding: 0.2rem 0.8rem 0.2rem 0.6rem;
+      border-radius: 30px;
+      transition: 0.1s;
+      border: 1px solid transparent;
+    }
+    .step-dot .num {
+      background: #c0d2e8;
+      border-radius: 30px;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.65rem;
+      color: #0b2f50;
+    }
+    .step-dot.active {
+      background: #d4e2f5;
+      color: #0b3255;
+      border-color: #9bb9dc;
+      font-weight: 600;
+    }
+    .step-dot.active .num { background: #1f5f8b; color: white; }
+    .step-dot.done { background: #d7eade; color: #1a5a3a; border-color: #98c9a8; }
+    .step-dot.done .num { background: #2a7a4a; color: white; }
+    .stepper-line {
+      flex: 1;
+      height: 2px;
+      background: #c9d8ea;
+      min-width: 10px;
+    }
+
+    /* страницы */
+    .page {
+      background: #fafcff;
+      border-radius: 24px;
+      padding: 1.2rem 1.4rem;
+      border: 1px solid #e3ecf8;
+      margin-bottom: 0.8rem;
+    }
+    .story-box {
+      background: #f2f8ff;
+      padding: 0.9rem 1.2rem;
+      border-radius: 16px;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      border: 1px solid #dde8f5;
+      color: #142b44;
+      margin: 0.2rem 0 1rem 0;
+    }
+    .task-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.6rem;
+      color: #0b2a44;
+    }
+    .check-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin: 0.2rem 0 0.6rem 0;
+    }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      background: #ffffff;
+      padding: 0.35rem 0.8rem 0.35rem 0.7rem;
+      border-radius: 12px;
+      border: 1.5px solid #e1ebf6;
+      transition: 0.1s;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .check-item:hover { background: #f2f8ff; border-color: #b8cee8; }
+    .check-item input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      margin-top: 0.08rem;
+      flex-shrink: 0;
+      accent-color: #1a6b9c;
+      cursor: pointer;
+    }
+    .check-item label { cursor: pointer; user-select: none; color: #0b1f33; }
+
+    .check-item.correct { border-color: #1e8e3e; background: #e3f5e9; }
+    .check-item.wrong { border-color: #c72a2a; background: #ffe6e6; }
+    .check-item.missed { border-color: #c72a2a; background: #ffe6e6; border-style: dashed; }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-top: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: white;
+      border: 1px solid #c7d9ed;
+      padding: 0.4rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 600;
+      color: #1b4470;
+      cursor: pointer;
+      transition: 0.1s;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-primary {
+      background: #1a5f8b;
+      border: 1px solid #1a5f8b;
+      color: white;
+      box-shadow: 0 3px 8px rgba(21, 80, 120, 0.18);
+    }
+    .btn-primary:hover { background: #0e4a70; }
+    .btn-outline:hover { background: #e9f0fa; }
+    .btn:active { transform: scale(0.96); }
+
+    .result-banner {
+      margin: 0.6rem 0 0.4rem 0;
+      padding: 0.7rem 1.2rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1px solid;
+    }
+    .result-banner.success { background: #e1f5e8; border-color: #1f8b4c; color: #0a4628; display: flex; }
+    .result-banner.fail { background: #fde9e9; border-color: #b33c3c; color: #712b2b; display: flex; }
+
+    /* пояснения – отдельная карта */
+    .explanation-block {
+      background: #f2f8fe;
+      border-radius: 18px;
+      padding: 0.8rem 1rem 1rem;
+      border: 1px solid #d6e5f5;
+      margin: 0.2rem 0 0.2rem 0;
+    }
+    .explanation-block h3 {
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      color: #0b2a44;
+    }
+    .explanation-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .explanation-table th {
+      text-align: left;
+      background: #dce8f5;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid #c2d4e8;
+    }
+    .explanation-table td {
+      padding: 0.35rem 0.5rem;
+      border: 1px solid #c2d4e8;
+      vertical-align: top;
+      background: white;
+    }
+    .fnp-link { color: #0059b3; text-decoration: none; font-weight: 500; }
+    .footnote {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      background: #e7eef9;
+      padding: 0.3rem 0.8rem;
+      border-radius: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .card { padding: 1rem; }
+      .page { padding: 0.8rem; }
+      .step-dot { font-size: 0.6rem; padding: 0.1rem 0.5rem; }
+      .step-dot .num { width: 17px; height: 17px; font-size: 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="card" id="app">
+
+  <h1>
+    <span>🧪 Работы внутри емкости</span>
+    <span class="badge-step">кейс</span>
+  </h1>
+
+  <!-- stepper -->
+  <div class="stepper" id="stepper">
+    <div class="step-dot active" data-step="0"><span class="num">1</span> Вводная</div>
+    <div class="stepper-line"></div>
+    <div class="step-dot" data-step="1"><span class="num">2</span> Нарушения</div>
+    <div class="stepper-line"></div>
+    <div class="step-dot" data-step="2"><span class="num">3</span> Результат</div>
+    <div class="stepper-line"></div>
+    <div class="step-dot" data-step="3"><span class="num">4</span> Пояснения</div>
+  </div>
+
+  <!-- страницы -->
+  <div id="pageContainer">
+    <!-- страница 0: вводная -->
+    <div class="page" data-page="0">
+      <div class="subhead" style="margin-top:0;">
+        На опасном производственном объекте необходимо провести очистку внутренней поверхности емкости. Руководитель подразделения назначил бригаду, выдал наряд-допуск. <br><strong>Проверьте, все ли организовано правильно. Отметьте все нарушения.</strong>
+      </div>
+      <div class="story-box">
+        <strong>📄 Описание ситуации</strong><br>
+        Бригада из двух человек заходит на очистку емкости. Температура внутри емкости — 45 °C. Один работник спускается внутрь без шлангового противогаза, ссылаясь на то, что «там уже все проветрили». Второй остается наверху как наблюдающий, но зрительной связи с работающим нет — они договорились кричать друг другу. Светильник используют обычный, без взрывозащиты. Инструмент — стальной скребок. Анализ воздуха проводили утром, результаты записаны в наряде-допуске, но во время работ повторный анализ не делают. Ответственный за проведение находится на другом объекте и контролирует работы по телефону. Наряд-допуск не содержит схемы запорной арматуры.
+      </div>
+      <div style="display:flex; justify-content:flex-end; margin-top:0.2rem;">
+        <button class="btn btn-primary" id="toStep1">Далее →</button>
+      </div>
+    </div>
+
+    <!-- страница 1: чек-боксы (без подсказок) -->
+    <div class="page" data-page="1" style="display:none;">
+      <div class="task-title">☑️ Отметьте все нарушения</div>
+      <form id="checkForm" class="check-group">
+        <div class="check-item" data-index="0"><input type="checkbox" id="chk1" value="1"><label for="chk1">В бригаде только два человека</label></div>
+        <div class="check-item" data-index="1"><input type="checkbox" id="chk2" value="2"><label for="chk2">Температура внутри емкости 45 °C</label></div>
+        <div class="check-item" data-index="2"><input type="checkbox" id="chk3" value="3"><label for="chk3">Работник спускается без шлангового или изолирующего противогаза</label></div>
+        <div class="check-item" data-index="3"><input type="checkbox" id="chk4" value="4"><label for="chk4">Отсутствие зрительной связи между работающим и наблюдающим</label></div>
+        <div class="check-item" data-index="4"><input type="checkbox" id="chk5" value="5"><label for="chk5">Используется обычный светильник, а не во взрывозащищенном исполнении</label></div>
+        <div class="check-item" data-index="5"><input type="checkbox" id="chk6" value="6"><label for="chk6">Используется стальной инструмент</label></div>
+        <div class="check-item" data-index="6"><input type="checkbox" id="chk7" value="7"><label for="chk7">Анализ воздуха проводили только утром, повторного нет</label></div>
+        <div class="check-item" data-index="7"><input type="checkbox" id="chk8" value="8"><label for="chk8">Ответственный за проведение контролирует работы по телефону</label></div>
+        <div class="check-item" data-index="8"><input type="checkbox" id="chk9" value="9"><label for="chk9">Наряд-допуск не содержит схемы запорной арматуры</label></div>
+      </form>
+      <div class="nav">
+        <button class="btn btn-outline" id="backTo0">← Назад</button>
+        <button class="btn btn-primary" id="checkBtn">✅ Проверить</button>
+      </div>
+    </div>
+
+    <!-- страница 2: результат (без пояснений) -->
+    <div class="page" data-page="2" style="display:none;">
+      <div id="resultBanner" class="result-banner"></div>
+      <div class="nav" style="margin-top:0.6rem;">
+        <button class="btn btn-outline" id="backTo1">← Назад к нарушениям</button>
+        <button class="btn btn-primary" id="toExplanations">📘 Смотреть пояснения →</button>
+      </div>
+    </div>
+
+    <!-- страница 3: пояснения -->
+    <div class="page" data-page="3" style="display:none;">
+      <div id="explanationBlock" class="explanation-block">
+        <h3>📘 Пояснения и ссылки на ФНП № 528</h3>
+        <table class="explanation-table"><tbody id="explanationBody"></tbody></table>
+        <div class="footnote">ℹ️ Пункт 1 (бригада из двух человек) — не нарушение. Минимально допустимый состав согласно п. 49 ФНП № 528.</div>
+      </div>
+      <div class="nav" style="margin-top:0.6rem;">
+        <button class="btn btn-outline" id="backToResult">← Назад к результату</button>
+        <button class="btn btn-outline" id="resetAll">🔄 Пройти заново</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  (function() {
+    // данные нарушений
+    const violationMap = [
+      { id: 1, isViolation: false, label: 'В бригаде только два человека' },
+      { id: 2, isViolation: true, label: 'Температура внутри емкости 45 °C' },
+      { id: 3, isViolation: true, label: 'Работник спускается без шлангового или изолирующего противогаза' },
+      { id: 4, isViolation: true, label: 'Отсутствие зрительной связи между работающим и наблюдающим' },
+      { id: 5, isViolation: true, label: 'Используется обычный светильник, а не во взрывозащищенном исполнении' },
+      { id: 6, isViolation: true, label: 'Используется стальной инструмент' },
+      { id: 7, isViolation: true, label: 'Анализ воздуха проводили только утром, повторного нет' },
+      { id: 8, isViolation: true, label: 'Ответственный за проведение контролирует работы по телефону' },
+      { id: 9, isViolation: true, label: 'Наряд-допуск не содержит схемы запорной арматуры' }
+    ];
+
+    const explanations = [
+      null,
+      { text: 'Нагретые емкости должны быть охлаждены до ≤30 °C. При 45 °C требуются доп. меры (обдувка, термозащита, перерывы), но они не предусмотрены.', fnp: 'п. 47' },
+      { text: 'Для защиты дыхания внутри емкостей применяются шланговые или кислородно-изолирующие противогазы. Фильтрующие не допускаются.', fnp: 'п. 48' },
+      { text: 'При отсутствии зрительной связи должна быть система условных сигналов. «Кричать» не является допустимой системой.', fnp: 'п. 51' },
+      { text: 'В замкнутых пространствах с возможной взрывоопасной средой — только взрывозащищенное освещение.', fnp: 'п. 43 (косвенно)' },
+      { text: 'Инструмент из неискрящих материалов (медь, бронза, покрытие). Стальной скребок дает искры.', fnp: 'п. 2.5.14' },
+      { text: 'Необходим непрерывный контроль воздушной среды либо периодический анализ. Однократного утреннего анализа недостаточно.', fnp: 'п. 44, п. 54' },
+      { text: 'На месте должен присутствовать ответственный за проведение газоопасных работ.', fnp: 'п. 49' },
+      { text: 'Емкости отключаются заглушками по схеме, прилагаемой к наряду-допуску. Отсутствие схемы — нарушение.', fnp: 'п. 43' }
+    ];
+
+    const pages = document.querySelectorAll('.page');
+    const stepperDots = document.querySelectorAll('.step-dot');
+    const toStep1 = document.getElementById('toStep1');
+    const backTo0 = document.getElementById('backTo0');
+    const backTo1 = document.getElementById('backTo1');
+    const backToResult = document.getElementById('backToResult');
+    const checkBtn = document.getElementById('checkBtn');
+    const toExplanations = document.getElementById('toExplanations');
+    const resetBtn = document.getElementById('resetAll');
+    const checkboxes = document.querySelectorAll('#checkForm input[type="checkbox"]');
+    const resultBanner = document.getElementById('resultBanner');
+    const explanationBody = document.getElementById('explanationBody');
+
+    let currentPage = 0;
+    let lastResult = { selected: [], missed: [] }; // для перехода к пояснениям
+
+    function goToPage(n) {
+      if (n < 0 || n > 3) return;
+      pages.forEach((p, i) => p.style.display = (i === n) ? 'block' : 'none');
+      stepperDots.forEach((dot, i) => {
+        dot.classList.remove('active', 'done');
+        if (i < n) dot.classList.add('done');
+        else if (i === n) dot.classList.add('active');
+      });
+      currentPage = n;
+    }
+
+    function resetCheckStyles() {
+      document.querySelectorAll('.check-item').forEach(el => {
+        el.classList.remove('correct', 'wrong', 'missed');
+      });
+      resultBanner.className = 'result-banner';
+      resultBanner.style.display = 'none';
+    }
+
+    function renderExplanations(selectedViolations, missedViolations) {
+      let rows = '';
+      for (let i = 1; i < violationMap.length; i++) {
+        const v = violationMap[i];
+        if (!v.isViolation) continue;
+        const exp = explanations[i];
+        const isSelected = selectedViolations.includes(v.id);
+        const isMissed = missedViolations.includes(v.id);
+        let mark = isSelected ? '✅ ' : (isMissed ? '❌ ' : '');
+        rows += `<tr>
+          <td>${mark}${v.label}</td>
+          <td>${exp ? exp.text : '—'}</td>
+          <td><a href="#" class="fnp-link" onclick="return false;">${exp ? exp.fnp : '—'}</a></td>
+        </tr>`;
+      }
+      rows += `<tr style="background:#f0f5fe;">
+        <td>🔹 В бригаде только два человека — это допустимо (не нарушение)</td>
+        <td>Бригада из двух человек (работающий и наблюдающий) — минимально допустимый состав согласно п. 49 ФНП № 528.</td>
+        <td><a href="#" class="fnp-link" onclick="return false;">п. 49</a></td>
+      </tr>`;
+      explanationBody.innerHTML = rows;
+    }
+
+    function runCheck() {
+      resetCheckStyles();
+
+      const checkedValues = [];
+      checkboxes.forEach(cb => { if (cb.checked) checkedValues.push(parseInt(cb.value)); });
+
+      const allViolationIds = violationMap.filter(v => v.isViolation).map(v => v.id);
+      const selectedViolations = checkedValues.filter(id => violationMap.find(v => v.id === id)?.isViolation === true);
+      const missedViolations = allViolationIds.filter(id => !checkedValues.includes(id));
+      const wrongSelections = checkedValues.filter(id => violationMap.find(v => v.id === id)?.isViolation === false);
+
+      lastResult = { selected: selectedViolations, missed: missedViolations };
+
+      checkboxes.forEach((cb, idx) => {
+        const itemDiv = cb.closest('.check-item');
+        const val = parseInt(cb.value);
+        const isViolation = violationMap[idx].isViolation;
+        const isChecked = cb.checked;
+        if (isViolation && isChecked) itemDiv.classList.add('correct');
+        else if (isViolation && !isChecked) itemDiv.classList.add('missed');
+        else if (!isViolation && isChecked) itemDiv.classList.add('wrong');
+      });
+
+      const allFound = (missedViolations.length === 0 && wrongSelections.length === 0);
+      resultBanner.style.display = 'flex';
+      if (allFound) {
+        resultBanner.className = 'result-banner success';
+        resultBanner.innerHTML = `<span>✅</span> Вы обнаружили все нарушения. Отличная работа!`;
+      } else {
+        let msg = '❌ Вы пропустили следующие нарушения: ';
+        if (missedViolations.length) {
+          const labels = missedViolations.map(id => violationMap.find(v => v.id === id)?.label || id);
+          msg += labels.join('; ');
+        }
+        if (wrongSelections.length) {
+          const wrongLabels = wrongSelections.map(id => violationMap.find(v => v.id === id)?.label || id);
+          msg += (missedViolations.length ? '; ' : '') + '🔴 отмечено как нарушение (но это не нарушение): ' + wrongLabels.join('; ');
+        }
+        msg += '. Для безопасного проведения работ необходимо ознакомиться с пояснениями.';
+        resultBanner.className = 'result-banner fail';
+        resultBanner.innerHTML = `<span>⚠️</span> ${msg}`;
+      }
+
+      // сохраняем для пояснений
+      renderExplanations(selectedViolations, missedViolations);
+      goToPage(2);
+    }
+
+    // переход к пояснениям (страница 3)
+    function showExplanations() {
+      // если пояснения уже были отрендерены, просто переходим
+      goToPage(3);
+    }
+
+    // события
+    toStep1.addEventListener('click', () => goToPage(1));
+    backTo0.addEventListener('click', () => goToPage(0));
+    backTo1.addEventListener('click', () => goToPage(1));
+    backToResult.addEventListener('click', () => goToPage(2));
+    checkBtn.addEventListener('click', runCheck);
+    toExplanations.addEventListener('click', showExplanations);
+
+    resetBtn.addEventListener('click', function() {
+      checkboxes.forEach(cb => cb.checked = false);
+      resetCheckStyles();
+      resultBanner.style.display = 'none';
+      explanationBody.innerHTML = '';
+      lastResult = { selected: [], missed: [] };
+      goToPage(0);
+    });
+
+    goToPage(0);
+  })();
+</script>
+</body>
+</html>
