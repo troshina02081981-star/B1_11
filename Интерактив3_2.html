@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Работы внутри емкости · кейс</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 0.5rem;
+        }
+
+        .card {
+            width: 500px;
+            height: 500px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 6px 24px rgba(0, 20, 40, 0.08);
+            padding: 0.9rem 1.2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e8edf5;
+        }
+
+        h1 {
+            font-size: 1rem;
+            font-weight: 650;
+            color: #0b1f3b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            margin-bottom: 0.05rem;
+        }
+        .badge-step {
+            font-size: 0.55rem;
+            background: #dce6f5;
+            padding: 0.05rem 0.6rem;
+            border-radius: 30px;
+            color: #1f4870;
+            font-weight: 600;
+        }
+
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.15rem 0 0.2rem 0;
+            gap: 0.1rem;
+            flex-shrink: 0;
+        }
+        .step-dot {
+            display: flex;
+            align-items: center;
+            gap: 0.1rem;
+            font-size: 0.5rem;
+            font-weight: 500;
+            color: #7a8fa8;
+            background: #eef3fa;
+            padding: 0.03rem 0.3rem 0.03rem 0.2rem;
+            border-radius: 30px;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .step-dot .num {
+            background: #c0d2e8;
+            border-radius: 30px;
+            width: 14px;
+            height: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.45rem;
+            color: #0b2f50;
+        }
+        .step-dot.active {
+            background: #d4e2f5;
+            color: #0b3255;
+            border-color: #9bb9dc;
+            font-weight: 600;
+        }
+        .step-dot.active .num {
+            background: #1f5f8b;
+            color: white;
+        }
+        .step-dot.done {
+            background: #d7eade;
+            color: #1a5a3a;
+            border-color: #98c9a8;
+        }
+        .step-dot.done .num {
+            background: #2a7a4a;
+            color: white;
+        }
+        .stepper-line {
+            flex: 1;
+            height: 2px;
+            background: #c9d8ea;
+            min-width: 3px;
+        }
+
+        .page {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+        .page.active {
+            display: flex;
+        }
+
+        .subhead {
+            background: #edf4fe;
+            padding: 0.2rem 0.6rem;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            line-height: 1.3;
+            color: #1a3552;
+            border-left: 3px solid #2a6f97;
+            flex-shrink: 0;
+            margin-bottom: 0.15rem;
+        }
+
+        .story-box {
+            background: #f2f8ff;
+            padding: 0.5rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            line-height: 1.5;
+            border: 1px solid #dde8f5;
+            color: #142b44;
+            flex-shrink: 0;
+            margin-bottom: 0.15rem;
+            overflow: hidden;
+        }
+        .story-box strong {
+            color: #003366;
+        }
+
+        .task-title {
+            font-weight: 600;
+            font-size: 0.7rem;
+            margin-bottom: 0.1rem;
+            color: #0b2a44;
+            flex-shrink: 0;
+        }
+
+        .check-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.1rem;
+            margin-bottom: 0.05rem;
+        }
+        .check-group::-webkit-scrollbar {
+            width: 3px;
+        }
+        .check-group::-webkit-scrollbar-thumb {
+            background: #c9d8ea;
+            border-radius: 10px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.25rem;
+            background: #ffffff;
+            padding: 0.08rem 0.3rem 0.08rem 0.25rem;
+            border-radius: 5px;
+            border: 1.5px solid #e1ebf6;
+            transition: 0.1s;
+            cursor: pointer;
+            font-size: 0.65rem;
+            flex-shrink: 0;
+            min-height: 20px;
+        }
+        .check-item:hover {
+            background: #f2f8ff;
+            border-color: #b8cee8;
+        }
+        .check-item input[type="checkbox"] {
+            width: 0.8rem;
+            height: 0.8rem;
+            margin-top: 0.03rem;
+            flex-shrink: 0;
+            accent-color: #1a6b9c;
+            cursor: pointer;
+        }
+        .check-item label {
+            cursor: pointer;
+            user-select: none;
+            color: #0b1f33;
+            line-height: 1.2;
+        }
+
+        .check-item.correct {
+            border-color: #1e8e3e;
+            background: #e3f5e9;
+        }
+        .check-item.wrong {
+            border-color: #c72a2a;
+            background: #ffe6e6;
+        }
+        .check-item.missed {
+            border-color: #c72a2a;
+            background: #ffe6e6;
+            border-style: dashed;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.2rem;
+            margin-top: 0.1rem;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: white;
+            border: 1px solid #c7d9ed;
+            padding: 0.08rem 0.6rem;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #1b4470;
+            cursor: pointer;
+            transition: 0.1s;
+            font-size: 0.55rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            height: 22px;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: #1a5f8b;
+            border: 1px solid #1a5f8b;
+            color: white;
+            box-shadow: 0 2px 6px rgba(21, 80, 120, 0.15);
+        }
+        .btn-primary:hover {
+            background: #0e4a70;
+        }
+        .btn-outline:hover {
+            background: #e9f0fa;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .result-banner {
+            margin: 0.1rem 0 0.05rem 0;
+            padding: 0.2rem 0.6rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.6rem;
+            display: none;
+            align-items: center;
+            gap: 0.2rem;
+            border: 1px solid;
+            flex-shrink: 0;
+            line-height: 1.2;
+        }
+        .result-banner.success {
+            background: #e1f5e8;
+            border-color: #1f8b4c;
+            color: #0a4628;
+            display: flex;
+        }
+        .result-banner.fail {
+            background: #fde9e9;
+            border-color: #b33c3c;
+            color: #712b2b;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .explanation-block {
+            background: #f2f8fe;
+            border-radius: 8px;
+            padding: 0.2rem 0.4rem 0.25rem;
+            border: 1px solid #d6e5f5;
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            margin-top: 0.05rem;
+        }
+        .explanation-block h3 {
+            font-size: 0.55rem;
+            margin-bottom: 0.05rem;
+            color: #0b2a44;
+            flex-shrink: 0;
+        }
+        .explanation-table-wrap {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.05rem;
+        }
+        .explanation-table-wrap::-webkit-scrollbar {
+            width: 2px;
+        }
+        .explanation-table-wrap::-webkit-scrollbar-thumb {
+            background: #c9d8ea;
+            border-radius: 10px;
+        }
+        .explanation-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.5rem;
+        }
+        .explanation-table th {
+            text-align: left;
+            background: #dce8f5;
+            padding: 0.05rem 0.2rem;
+            border: 1px solid #c2d4e8;
+            font-size: 0.45rem;
+        }
+        .explanation-table td {
+            padding: 0.05rem 0.2rem;
+            border: 1px solid #c2d4e8;
+            vertical-align: top;
+            background: white;
+            font-size: 0.5rem;
+        }
+        .fnp-link {
+            color: #0059b3;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .footnote {
+            margin-top: 0.05rem;
+            font-size: 0.45rem;
+            background: #e7eef9;
+            padding: 0.05rem 0.3rem;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 520px) {
+            .card {
+                width: 100%;
+                height: auto;
+                min-height: 500px;
+                max-height: 98vh;
+                padding: 0.6rem;
+            }
+            .stepper {
+                flex-wrap: wrap;
+                gap: 0.05rem;
+            }
+            .step-dot {
+                font-size: 0.4rem;
+                padding: 0.02rem 0.2rem;
+            }
+            .step-dot .num {
+                width: 12px;
+                height: 12px;
+                font-size: 0.4rem;
+            }
+            .story-box {
+                font-size: 0.72rem;
+                padding: 0.3rem 0.6rem;
+            }
+            .check-group {
+                max-height: 160px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="app">
+        <h1>
+            <span>🧪 Работы внутри емкости</span>
+            <span class="badge-step">кейс</span>
+        </h1>
+
+        <div class="stepper" id="stepper">
+            <div class="step-dot active" data-step="0"><span class="num">1</span> Вводная</div>
+            <div class="stepper-line"></div>
+            <div class="step-dot" data-step="1"><span class="num">2</span> Нарушения</div>
+            <div class="stepper-line"></div>
+            <div class="step-dot" data-step="2"><span class="num">3</span> Результат</div>
+            <div class="stepper-line"></div>
+            <div class="step-dot" data-step="3"><span class="num">4</span> Пояснения</div>
+        </div>
+
+        <div id="pageContainer" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+
+            <!-- страница 0: вводная -->
+            <div class="page active" data-page="0">
+                <div class="subhead" style="margin-top:0;">
+                    На ОПО необходимо провести очистку внутренней поверхности емкости. Руководитель выдал наряд-допуск. <strong>Проверьте, все ли организовано правильно.</strong>
+                </div>
+                <div class="story-box">
+                    <strong>📄 Описание ситуации</strong><br>
+                    Бригада из двух человек заходит на очистку емкости. Температура внутри — 45 °C. Один работник спускается внутрь без шлангового противогаза, ссылаясь на то, что «там уже все проветрили». Второй остается наверху как наблюдающий, но зрительной связи с работающим нет — они договорились кричать друг другу. Светильник используют обычный, без взрывозащиты. Инструмент — стальной скребок. Анализ воздуха проводили утром, результаты записаны в наряде-допуске, но во время работ повторный анализ не делают. Ответственный за проведение находится на другом объекте и контролирует работы по телефону. Наряд-допуск не содержит схемы запорной арматуры.
+                </div>
+                <div style="display:flex; justify-content:flex-end; margin-top:auto; padding-top:0.05rem;">
+                    <button class="btn btn-primary" id="toStep1">Далее →</button>
+                </div>
+            </div>
+
+            <!-- страница 1: чек-боксы -->
+            <div class="page" data-page="1">
+                <div class="task-title">☑️ Отметьте все нарушения</div>
+                <form id="checkForm" class="check-group">
+                    <div class="check-item" data-index="0"><input type="checkbox" id="chk1" value="1"><label for="chk1">В бригаде только два человека</label></div>
+                    <div class="check-item" data-index="1"><input type="checkbox" id="chk2" value="2"><label for="chk2">Температура внутри емкости 45 °C</label></div>
+                    <div class="check-item" data-index="2"><input type="checkbox" id="chk3" value="3"><label for="chk3">Работник спускается без шлангового противогаза</label></div>
+                    <div class="check-item" data-index="3"><input type="checkbox" id="chk4" value="4"><label for="chk4">Отсутствие зрительной связи</label></div>
+                    <div class="check-item" data-index="4"><input type="checkbox" id="chk5" value="5"><label for="chk5">Обычный светильник без взрывозащиты</label></div>
+                    <div class="check-item" data-index="5"><input type="checkbox" id="chk6" value="6"><label for="chk6">Стальной инструмент</label></div>
+                    <div class="check-item" data-index="6"><input type="checkbox" id="chk7" value="7"><label for="chk7">Анализ воздуха только утром</label></div>
+                    <div class="check-item" data-index="7"><input type="checkbox" id="chk8" value="8"><label for="chk8">Ответственный по телефону</label></div>
+                    <div class="check-item" data-index="8"><input type="checkbox" id="chk9" value="9"><label for="chk9">Нет схемы запорной арматуры</label></div>
+                </form>
+                <div class="nav">
+                    <button class="btn btn-outline" id="backTo0">← Назад</button>
+                    <button class="btn btn-primary" id="checkBtn">✅ Проверить</button>
+                </div>
+            </div>
+
+            <!-- страница 2: результат -->
+            <div class="page" data-page="2">
+                <div id="resultBanner" class="result-banner"></div>
+                <div class="nav" style="margin-top:auto; padding-top:0.05rem;">
+                    <button class="btn btn-outline" id="backTo1">← Назад</button>
+                    <button class="btn btn-primary" id="toExplanations">📘 Пояснения →</button>
+                </div>
+            </div>
+
+            <!-- страница 3: пояснения -->
+            <div class="page" data-page="3" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+                <div class="explanation-block">
+                    <h3>📘 Пояснения и ссылки на ФНП № 528</h3>
+                    <div class="explanation-table-wrap">
+                        <table class="explanation-table"><tbody id="explanationBody"></tbody></table>
+                    </div>
+                    <div class="footnote">ℹ️ Пункт 1 — не нарушение (п. 49 ФНП № 528).</div>
+                </div>
+                <div class="nav" style="margin-top:0.05rem;">
+                    <button class="btn btn-outline" id="backToResult">← Назад</button>
+                    <button class="btn btn-outline" id="resetAll">🔄 Заново</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const violationMap = [
+                { id: 1, isViolation: false, label: 'В бригаде только два человека' },
+                { id: 2, isViolation: true, label: 'Температура внутри емкости 45 °C' },
+                { id: 3, isViolation: true, label: 'Работник спускается без шлангового противогаза' },
+                { id: 4, isViolation: true, label: 'Отсутствие зрительной связи' },
+                { id: 5, isViolation: true, label: 'Обычный светильник без взрывозащиты' },
+                { id: 6, isViolation: true, label: 'Стальной инструмент' },
+                { id: 7, isViolation: true, label: 'Анализ воздуха только утром' },
+                { id: 8, isViolation: true, label: 'Ответственный по телефону' },
+                { id: 9, isViolation: true, label: 'Нет схемы запорной арматуры' }
+            ];
+
+            const explanations = [
+                null,
+                { text: 'Нагретые емкости должны быть охлаждены до ≤30 °C. При 45 °C требуются доп. меры.', fnp: 'п. 47' },
+                { text: 'Для защиты дыхания — шланговые или изолирующие противогазы.', fnp: 'п. 48' },
+                { text: 'При отсутствии зрительной связи — система условных сигналов.', fnp: 'п. 51' },
+                { text: 'В замкнутых пространствах — только взрывозащищенное освещение.', fnp: 'п. 43' },
+                { text: 'Инструмент из неискрящих материалов. Стальной дает искры.', fnp: 'п. 2.5.14' },
+                { text: 'Необходим непрерывный контроль воздушной среды.', fnp: 'п. 44, п. 54' },
+                { text: 'На месте должен присутствовать ответственный.', fnp: 'п. 49' },
+                { text: 'Емкости отключаются по схеме, прилагаемой к наряду.', fnp: 'п. 43' }
+            ];
+
+            const pages = document.querySelectorAll('.page');
+            const stepperDots = document.querySelectorAll('.step-dot');
+            const toStep1 = document.getElementById('toStep1');
+            const backTo0 = document.getElementById('backTo0');
+            const backTo1 = document.getElementById('backTo1');
+            const backToResult = document.getElementById('backToResult');
+            const checkBtn = document.getElementById('checkBtn');
+            const toExplanations = document.getElementById('toExplanations');
+            const resetBtn = document.getElementById('resetAll');
+            const checkboxes = document.querySelectorAll('#checkForm input[type="checkbox"]');
+            const resultBanner = document.getElementById('resultBanner');
+            const explanationBody = document.getElementById('explanationBody');
+
+            function goToPage(n) {
+                if (n < 0 || n > 3) return;
+                pages.forEach((p, i) => {
+                    p.style.display = (i === n) ? 'flex' : 'none';
+                });
+                stepperDots.forEach((dot, i) => {
+                    dot.classList.remove('active', 'done');
+                    if (i < n) dot.classList.add('done');
+                    else if (i === n) dot.classList.add('active');
+                });
+            }
+
+            function resetCheckStyles() {
+                document.querySelectorAll('.check-item').forEach(el => {
+                    el.classList.remove('correct', 'wrong', 'missed');
+                });
+                resultBanner.className = 'result-banner';
+                resultBanner.style.display = 'none';
+            }
+
+            function renderExplanations(selectedViolations, missedViolations) {
+                let rows = '';
+                for (let i = 1; i < violationMap.length; i++) {
+                    const v = violationMap[i];
+                    if (!v.isViolation) continue;
+                    const exp = explanations[i];
+                    const isSelected = selectedViolations.includes(v.id);
+                    const isMissed = missedViolations.includes(v.id);
+                    let mark = isSelected ? '✅ ' : (isMissed ? '❌ ' : '');
+                    rows += `<tr>
+                        <td>${mark}${v.label}</td>
+                        <td>${exp ? exp.text : '—'}</td>
+                        <td><a href="#" class="fnp-link" onclick="return false;">${exp ? exp.fnp : '—'}</a></td>
+                    </tr>`;
+                }
+                rows += `<tr style="background:#f0f5fe;">
+                    <td>🔹 В бригаде только два человека — это допустимо (не нарушение)</td>
+                    <td>Бригада из двух человек — минимально допустимый состав (п. 49 ФНП № 528).</td>
+                    <td><a href="#" class="fnp-link" onclick="return false;">п. 49</a></td>
+                </tr>`;
+                explanationBody.innerHTML = rows;
+            }
+
+            function runCheck() {
+                resetCheckStyles();
+
+                const checkedValues = [];
+                checkboxes.forEach(cb => { if (cb.checked) checkedValues.push(parseInt(cb.value)); });
+
+                const allViolationIds = violationMap.filter(v => v.isViolation).map(v => v.id);
+                const selectedViolations = checkedValues.filter(id => violationMap.find(v => v.id === id)?.isViolation === true);
+                const missedViolations = allViolationIds.filter(id => !checkedValues.includes(id));
+                const wrongSelections = checkedValues.filter(id => violationMap.find(v => v.id === id)?.isViolation === false);
+
+                checkboxes.forEach((cb, idx) => {
+                    const itemDiv = cb.closest('.check-item');
+                    const val = parseInt(cb.value);
+                    const isViolation = violationMap[idx].isViolation;
+                    const isChecked = cb.checked;
+                    if (isViolation && isChecked) itemDiv.classList.add('correct');
+                    else if (isViolation && !isChecked) itemDiv.classList.add('missed');
+                    else if (!isViolation && isChecked) itemDiv.classList.add('wrong');
+                });
+
+                const allFound = (missedViolations.length === 0 && wrongSelections.length === 0);
+                resultBanner.style.display = 'flex';
+                if (allFound) {
+                    resultBanner.className = 'result-banner success';
+                    resultBanner.innerHTML = `✅ Все нарушения найдены!`;
+                } else {
+                    let msg = '❌ ';
+                    if (missedViolations.length) {
+                        const labels = missedViolations.map(id => violationMap.find(v => v.id === id)?.label || id);
+                        msg += 'Пропущено: ' + labels.join('; ');
+                    }
+                    if (wrongSelections.length) {
+                        const wrongLabels = wrongSelections.map(id => violationMap.find(v => v.id === id)?.label || id);
+                        msg += (missedViolations.length ? '; ' : '') + 'Лишнее: ' + wrongLabels.join('; ');
+                    }
+                    resultBanner.className = 'result-banner fail';
+                    resultBanner.innerHTML = msg;
+                }
+
+                renderExplanations(selectedViolations, missedViolations);
+                goToPage(2);
+            }
+
+            toStep1.addEventListener('click', () => goToPage(1));
+            backTo0.addEventListener('click', () => goToPage(0));
+            backTo1.addEventListener('click', () => goToPage(1));
+            backToResult.addEventListener('click', () => goToPage(2));
+            checkBtn.addEventListener('click', runCheck);
+            toExplanations.addEventListener('click', () => goToPage(3));
+
+            resetBtn.addEventListener('click', function() {
+                checkboxes.forEach(cb => cb.checked = false);
+                resetCheckStyles();
+                resultBanner.style.display = 'none';
+                explanationBody.innerHTML = '';
+                goToPage(0);
+            });
+
+            goToPage(0);
+        })();
+    </script>
+
+</body>
+</html>
