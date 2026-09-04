@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Найдите нарушения при огневых работах</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            height: 100%;
+            max-height: 98vh;
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 20px 24px 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Шапка */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            flex-shrink: 0;
+            margin-bottom: 6px;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            font-weight: 650;
+            color: #0b1f3b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            font-size: 0.6rem;
+            background: #dce6f5;
+            padding: 0.1rem 0.7rem;
+            border-radius: 30px;
+            color: #1f4870;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .subhead {
+            background: #edf4fe;
+            padding: 0.4rem 1rem;
+            border-radius: 14px;
+            font-size: 0.82rem;
+            line-height: 1.4;
+            color: #1a3552;
+            border-left: 4px solid #d4872a;
+            flex-shrink: 0;
+            margin-bottom: 6px;
+        }
+
+        /* Блок с ситуацией — показывается полностью, без сворачивания */
+        .story-box {
+            background: #faf8f5;
+            padding: 0.7rem 1.2rem;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            border: 1px solid #e8e0d6;
+            color: #1a2a3a;
+            flex-shrink: 0;
+            margin-bottom: 8px;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .story-box strong {
+            color: #b33c0a;
+        }
+
+        .story-box .click-hint {
+            font-size: 0.7rem;
+            color: #8a7a6a;
+            display: block;
+            margin-top: 0.3rem;
+            font-weight: 400;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .story-box .click-hint:hover {
+            color: #b33c0a;
+        }
+
+        /* Основная часть — список нарушений, занимает всё свободное место */
+        .scroll-area {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            margin: 0 -4px;
+            padding: 0 4px;
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scroll-area::-webkit-scrollbar-track {
+            background: #f0f2f5;
+            border-radius: 8px;
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: #c5d0e0;
+            border-radius: 8px;
+        }
+
+        .violation-list {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            padding: 2px 0 4px;
+        }
+
+        .violation-list.open {
+            display: flex;
+        }
+
+        .violation-item {
+            background: #fafcff;
+            border-radius: 10px;
+            border: 2px solid #e1ebf6;
+            padding: 0.4rem 0.7rem 0.4rem 0.9rem;
+            transition: border 0.15s, background 0.1s;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.88rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .violation-item:hover {
+            background: #f2f8ff;
+            border-color: #b8cee8;
+        }
+
+        .violation-item input[type="checkbox"] {
+            width: 1.1rem;
+            height: 1.1rem;
+            margin-top: 0.1rem;
+            flex-shrink: 0;
+            accent-color: #1a6b9c;
+            cursor: pointer;
+        }
+
+        .violation-item label {
+            font-size: 0.88rem;
+            color: #0b1f33;
+            cursor: pointer;
+            line-height: 1.4;
+            user-select: none;
+            flex: 1;
+        }
+
+        .violation-item.correct {
+            border-color: #1e8e3e;
+            background: #eef9f2;
+        }
+        .violation-item.wrong {
+            border-color: #c72a2a;
+            background: #fff0f0;
+        }
+        .violation-item.missed {
+            border-color: #d4a017;
+            background: #fef8e7;
+            border-style: dashed;
+        }
+
+        /* Кнопки и баннер — фиксированная нижняя часть */
+        .bottom-section {
+            flex-shrink: 0;
+            padding-top: 6px;
+            border-top: 1px solid #f0f2f6;
+            margin-top: 4px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            background: white;
+            border: 1px solid #c7d9ed;
+            padding: 0.3rem 1.4rem;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #1b4470;
+            cursor: pointer;
+            transition: 0.1s;
+            font-size: 0.82rem;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #b33c0a;
+            border: 1px solid #b33c0a;
+            color: white;
+            box-shadow: 0 4px 12px rgba(179, 60, 10, 0.2);
+        }
+        .btn-primary:hover {
+            background: #8f2f08;
+        }
+        .btn-outline:hover {
+            background: #e9f0fa;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .banner {
+            margin-top: 4px;
+            padding: 0.4rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            display: none;
+            border: 1px solid;
+            line-height: 1.4;
+        }
+        .banner.success {
+            background: #e1f5e8;
+            border-color: #1f8b4c;
+            color: #0a4628;
+            display: block;
+        }
+        .banner.fail {
+            background: #fde9e9;
+            border-color: #b33c3c;
+            color: #712b2b;
+            display: block;
+        }
+
+        /* Пояснения — появляются снизу, внутри bottom-section, с прокруткой при необходимости */
+        .explanations-block {
+            background: #f2f8fe;
+            border-radius: 12px;
+            padding: 0.4rem 0.8rem 0.6rem;
+            border: 1px solid #d6e5f5;
+            margin-top: 4px;
+            display: none;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .explanations-block.open {
+            display: block;
+        }
+
+        .explanations-block::-webkit-scrollbar {
+            width: 3px;
+        }
+        .explanations-block::-webkit-scrollbar-thumb {
+            background: #b0c8e0;
+            border-radius: 8px;
+        }
+
+        .explanations-block h4 {
+            font-size: 0.8rem;
+            color: #0b2a44;
+            margin-bottom: 0.2rem;
+        }
+
+        .explanations-block ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .explanations-block ul li {
+            font-size: 0.78rem;
+            padding: 0.2rem 0 0.2rem 1.6rem;
+            position: relative;
+            color: #1a3552;
+            line-height: 1.4;
+            border-bottom: 1px solid #e8edf5;
+        }
+
+        .explanations-block ul li:last-child {
+            border-bottom: none;
+        }
+
+        .explanations-block ul li .icon {
+            position: absolute;
+            left: 0;
+            top: 0.2rem;
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                padding: 12px 14px 10px;
+                border-radius: 16px;
+                max-height: 100vh;
+            }
+            h1 {
+                font-size: 1.1rem;
+            }
+            .story-box {
+                font-size: 0.78rem;
+                padding: 0.5rem 0.9rem;
+            }
+            .violation-item {
+                font-size: 0.78rem;
+                padding: 0.3rem 0.5rem 0.3rem 0.7rem;
+            }
+            .violation-item label {
+                font-size: 0.78rem;
+            }
+            .btn {
+                font-size: 0.75rem;
+                height: 32px;
+                padding: 0.2rem 1rem;
+            }
+            .subhead {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.8rem;
+            }
+            .explanations-block {
+                max-height: 80px;
+            }
+            .explanations-block ul li {
+                font-size: 0.7rem;
+                padding: 0.15rem 0 0.15rem 1.4rem;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 8px 10px 8px;
+                border-radius: 12px;
+            }
+            .btn-group {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 0.3rem;
+            }
+            .btn {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.8rem;
+                height: 28px;
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+            .violation-item input[type="checkbox"] {
+                width: 0.9rem;
+                height: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <!-- Шапка -->
+        <div class="header">
+            <h1>
+                <span>🔥 Найдите нарушения при огневых работах</span>
+                <span class="badge">интерактив</span>
+            </h1>
+        </div>
+        <div class="subhead">
+            <strong>Задание:</strong> Прочитайте описание и отметьте <strong>только нарушения</strong>. Лишние пункты отмечать не нужно.
+        </div>
+
+        <!-- Ситуация — показывается полностью -->
+        <div class="story-box">
+            <strong>📄 Ситуация</strong><br>
+            Бригада из двух сварщиков проводит электросварочные работы на опасном производственном объекте.
+            Работы начали в 20:00, чтобы не мешать основному производству.
+            Наряд-допуск оформлен на каждое место работ, заполнен карандашом, исправления не допускаются.
+            Ответственный за подготовку назначен, ответственный за проведение — тот же человек.
+            Анализ воздуха провели за день до начала работ, показатели в норме.
+            Электроприводы отключили, на пусковых устройствах повесили плакаты.
+            Крышки колодцев канализации в зоне работ не проверяли — «там и так все чисто».
+            Средства пожаротушения есть, но огнетушитель один на весь цех.
+            Посторонние в зоне работ находятся — смотрят за процессом.
+            После завершения работ руководитель ушел, не дожидаясь наблюдения за местом.
+            <span class="click-hint" id="toggleHint">▼ Нажмите, чтобы показать список нарушений</span>
+        </div>
+
+        <!-- Область со списком (скроллится) -->
+        <div class="scroll-area">
+            <form id="checkForm">
+                <div class="violation-list" id="violationList"></div>
+            </form>
+        </div>
+
+        <!-- Нижняя фиксированная часть -->
+        <div class="bottom-section">
+            <div class="btn-group">
+                <button class="btn btn-primary" id="checkBtn">✅ Проверить</button>
+                <button class="btn btn-outline" id="resetBtn">🔄 Сбросить</button>
+            </div>
+
+            <div id="banner" class="banner"></div>
+
+            <div id="explanationsBlock" class="explanations-block">
+                <h4>📘 Пояснения по каждому пункту</h4>
+                <ul id="explanationsList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---- данные: 8 нарушений + 3 "ловушки" ----
+            const rawItems = [{
+                id: 1,
+                text: 'Работы начали в 20:00 (в темное время суток)',
+                isViolation: true,
+                explanation: 'Огневые работы проводят только в дневное время, за исключением ликвидации аварий (п. 64 ФНП № 528).'
+            }, {
+                id: 2,
+                text: 'Наряд-допуск заполнен карандашом',
+                isViolation: true,
+                explanation: 'Заполнение наряда-допуска карандашом запрещено. Документ должен быть четким и читаемым (п. 77 ФНП № 528).'
+            }, {
+                id: 3,
+                text: 'Ответственный за подготовку и проведение — одно лицо',
+                isViolation: true,
+                explanation: 'Ответственный за подготовку и ответственный за проведение не могут быть одним лицом. Это разные зоны ответственности (п. 69 ФНП № 528).'
+            }, {
+                id: 4,
+                text: 'Анализ воздуха провели за день до начала работ',
+                isViolation: true,
+                explanation: 'Анализ воздушной среды должен проводиться непосредственно перед началом огневых работ и после перерывов более часа (п. 95 ФНП № 528).'
+            }, {
+                id: 5,
+                text: 'Крышки колодцев канализации в зоне работ не проверяли',
+                isViolation: true,
+                explanation: 'Крышки колодцев должны быть засыпаны слоем песка не менее 10 см в стальном или железобетонном кольце (п. 90 ФНП № 528).'
+            }, {
+                id: 6,
+                text: 'Огнетушитель один на весь цех',
+                isViolation: true,
+                explanation: 'В зоне проведения огневых работ должны быть первичные средства пожаротушения в достаточном количестве (п. 97 ФНП № 528).'
+            }, {
+                id: 7,
+                text: 'Посторонние в зоне работ находятся',
+                isViolation: true,
+                explanation: 'В зоне проведения огневых работ не допускается нахождение лиц, не занятых выполнением работ (п. 103 ФНП № 528).'
+            }, {
+                id: 8,
+                text: 'Руководитель ушел сразу после работ, не дожидаясь наблюдения',
+                isViolation: true,
+                explanation: 'После завершения огневых работ необходимо обеспечить наблюдение за возможными очагами пожара в течение 4 часов (п. 104 ФНП № 528).'
+            }, {
+                id: 9,
+                text: 'Бригада состоит из двух сварщиков',
+                isViolation: false,
+                explanation: 'Это не нарушение. В составе бригады может быть два человека, если это предусмотрено нарядом-допуском и обеспечивает безопасность.'
+            }, {
+                id: 10,
+                text: 'Наряд-допуск оформлен на каждое место работ',
+                isViolation: false,
+                explanation: 'Это не нарушение. Наряд-допуск выдается на каждое место и вид работ каждой бригаде (п. 71 ФНП № 528).'
+            }, {
+                id: 11,
+                text: 'Электроприводы отключили, на пусковых устройствах повесили плакаты',
+                isViolation: false,
+                explanation: 'Это не нарушение. Отключение электроприводов с видимым разрывом и вывешивание плакатов — обязательное требование (п. 89 ФНП № 528).'
+            }];
+
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            const items = shuffleArray([...rawItems]);
+
+            // ---- DOM ----
+            const container = document.getElementById('violationList');
+            const checkBtn = document.getElementById('checkBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const banner = document.getElementById('banner');
+            const explanationsBlock = document.getElementById('explanationsBlock');
+            const explanationsList = document.getElementById('explanationsList');
+            const toggleHint = document.getElementById('toggleHint');
+
+            // ---- рендер ----
+            function renderItems() {
+                let html = '';
+                items.forEach((item) => {
+                    html += `
+                        <div class="violation-item" data-id="${item.id}" id="v-${item.id}">
+                            <input type="checkbox" id="chk-${item.id}" value="${item.id}" />
+                            <label for="chk-${item.id}">${item.text}</label>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+
+            // ---- переключение списка ----
+            function toggleList() {
+                container.classList.toggle('open');
+                if (container.classList.contains('open')) {
+                    toggleHint.textContent = '▲ Нажмите, чтобы скрыть список нарушений';
+                } else {
+                    toggleHint.textContent = '▼ Нажмите, чтобы показать список нарушений';
+                }
+            }
+
+            // ---- сбор ответов ----
+            function getAnswers() {
+                const results = [];
+                items.forEach(item => {
+                    const cb = document.getElementById(`chk-${item.id}`);
+                    results.push({
+                        id: item.id,
+                        checked: cb.checked,
+                        isViolation: item.isViolation,
+                        text: item.text,
+                        explanation: item.explanation
+                    });
+                });
+                return results;
+            }
+
+            // ---- проверка ----
+            function checkAnswers() {
+                const results = getAnswers();
+
+                document.querySelectorAll('.violation-item').forEach(el => {
+                    el.classList.remove('correct', 'wrong', 'missed');
+                });
+
+                let wrongCount = 0;
+                let missedCount = 0;
+
+                results.forEach(r => {
+                    const item = document.getElementById(`v-${r.id}`);
+                    if (!item) return;
+
+                    const isCorrect = (r.checked === r.isViolation);
+                    if (isCorrect) {
+                        item.classList.add('correct');
+                    } else if (r.checked && !r.isViolation) {
+                        item.classList.add('wrong');
+                        wrongCount++;
+                    } else if (!r.checked && r.isViolation) {
+                        item.classList.add('missed');
+                        missedCount++;
+                    }
+                });
+
+                const allCorrect = (wrongCount === 0 && missedCount === 0);
+                banner.style.display = 'block';
+                if (allCorrect) {
+                    banner.className = 'banner success';
+                    banner.innerHTML = '✅ <strong>Отлично!</strong> Вы правильно определили все нарушения и не отметили лишнего. Так держать!';
+                } else {
+                    banner.className = 'banner fail';
+                    let msg = '❌ <strong>Не все нарушения найдены или есть лишние отметки.</strong> ';
+                    if (wrongCount > 0) msg += `🔴 Отмечено как нарушение (но это не нарушение): ${wrongCount}. `;
+                    if (missedCount > 0) msg += `⚠️ Пропущено нарушений: ${missedCount}. `;
+                    msg += 'Ознакомьтесь с пояснениями ниже.';
+                    banner.innerHTML = msg;
+                }
+
+                // ---- Пояснения ----
+                let explHtml = '';
+                results.forEach(r => {
+                    const isCorrect = (r.checked === r.isViolation);
+                    let icon = isCorrect ? '✅' : '❌';
+                    explHtml += `
+                        <li>
+                            <span class="icon">${icon}</span>
+                            <strong>${r.text}</strong>
+                            <br>
+                            <span style="font-size:0.78rem; color:#3a5a7a;">
+                                ${r.explanation}
+                            </span>
+                        </li>
+                    `;
+                });
+                explanationsList.innerHTML = explHtml;
+                explanationsBlock.classList.add('open');
+
+                // скролл к нижней части
+                const bottom = document.querySelector('.bottom-section');
+                if (bottom) {
+                    bottom.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            // ---- сброс ----
+            function resetAll() {
+                document.querySelectorAll('.violation-item input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('.violation-item').forEach(el => {
+                    el.classList.remove('correct', 'wrong', 'missed');
+                });
+                banner.className = 'banner';
+                banner.style.display = 'none';
+                banner.innerHTML = '';
+                explanationsBlock.classList.remove('open');
+                explanationsList.innerHTML = '';
+
+                // Если список закрыт — открываем его для удобства
+                if (!container.classList.contains('open')) {
+                    toggleList();
+                }
+            }
+
+            // ---- инициализация ----
+            renderItems();
+            container.classList.remove('open');
+
+            toggleHint.addEventListener('click', toggleList);
+            checkBtn.addEventListener('click', checkAnswers);
+            resetBtn.addEventListener('click', resetAll);
+
+            document.addEventListener('change', function(e) {
+                if (e.target && e.target.matches('.violation-item input[type="checkbox"]')) {
+                    const item = e.target.closest('.violation-item');
+                    if (item) {
+                        item.classList.remove('correct', 'wrong', 'missed');
+                    }
+                    banner.className = 'banner';
+                    banner.style.display = 'none';
+                    explanationsBlock.classList.remove('open');
+                }
+            });
+
+        })();
+    </script>
+
+</body>
+</html>
