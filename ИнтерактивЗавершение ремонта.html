@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Собери последовательность</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+
+        .container {
+            max-width: 780px;
+            width: 100%;
+            height: 100%;
+            max-height: 98vh;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 20px 24px 18px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #eef2f7;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+        }
+
+        .header {
+            flex-shrink: 0;
+            margin-bottom: 10px;
+        }
+
+        .header h2 {
+            font-size: 1.2rem;
+            font-weight: 650;
+            color: #0b1f3b;
+        }
+
+        .header p {
+            font-size: 0.82rem;
+            color: #5a7a9a;
+            margin-top: 2px;
+        }
+
+        .game-area {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .steps-list {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 4px 2px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .steps-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .steps-list::-webkit-scrollbar-thumb {
+            background: #c5d0e0;
+            border-radius: 8px;
+        }
+
+        .step-item {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #0b1f3b;
+            background: #f7f9fc;
+            border: 2px solid #dce6f5;
+            cursor: grab;
+            user-select: none;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-item:hover {
+            background: #eef4fb;
+            transform: scale(1.01);
+        }
+
+        .step-item:active {
+            cursor: grabbing;
+        }
+
+        .step-item .step-num {
+            font-weight: 700;
+            color: #1a5f8b;
+            font-size: 0.9rem;
+            min-width: 28px;
+        }
+
+        .step-item.dragging {
+            opacity: 0.3;
+            transform: scale(0.98);
+        }
+
+        .step-item.drag-over {
+            border-color: #1a5f8b;
+            background: #edf4fe;
+            transform: scale(1.02);
+        }
+
+        .step-item.correct {
+            border-color: #1e8e3e;
+            background: #d7eade;
+        }
+
+        .step-item.wrong {
+            border-color: #c72a2a;
+            background: #fde0e0;
+        }
+
+        .step-item .status-icon {
+            font-size: 1rem;
+            margin-left: auto;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            margin-top: 6px;
+        }
+
+        .btn {
+            background: white;
+            border: 1px solid #c7d9ed;
+            padding: 0.25rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #1b4470;
+            cursor: pointer;
+            transition: 0.1s;
+            font-size: 0.8rem;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #1a5f8b;
+            border: 1px solid #1a5f8b;
+            color: white;
+            box-shadow: 0 3px 8px rgba(21, 80, 120, 0.15);
+        }
+        .btn-primary:hover {
+            background: #0e4a70;
+        }
+        .btn-outline:hover {
+            background: #e9f0fa;
+        }
+
+        .banner {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            display: none;
+            border: 1px solid;
+            line-height: 1.5;
+            margin-top: 6px;
+        }
+        .banner.show {
+            display: block;
+        }
+        .banner.success {
+            background: #e1f5e8;
+            border-color: #1f8b4c;
+            color: #0a4628;
+        }
+        .banner.fail {
+            background: #fde9e9;
+            border-color: #b33c3c;
+            color: #712b2b;
+        }
+
+        .hint {
+            flex-shrink: 0;
+            font-size: 0.7rem;
+            color: #8a9aa8;
+            text-align: center;
+            padding-top: 4px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px 14px 12px;
+                max-height: 100vh;
+                border-radius: 16px;
+            }
+            .header h2 {
+                font-size: 1rem;
+            }
+            .step-item {
+                font-size: 0.78rem;
+                padding: 8px 12px;
+            }
+            .btn {
+                font-size: 0.7rem;
+                height: 30px;
+                padding: 0.2rem 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h2>🧩 Расставьте этапы в правильном порядке</h2>
+            <p>Перетащите карточки так, чтобы они шли в нужной последовательности</p>
+        </div>
+
+        <div class="game-area">
+            <div class="steps-list" id="stepsList"></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" id="checkBtn">✅ Проверить</button>
+            <button class="btn btn-outline" id="resetBtn">🔄 Сбросить</button>
+        </div>
+
+        <div class="banner" id="banner"></div>
+        <div class="hint">Перетаскивайте карточки мышкой, меняя их порядок</div>
+    </div>
+
+    <script>
+        (function() {
+            // ---- данные (без буквы ё) ----
+            const stepsData = [
+                { id: 1, text: 'Провести испытания оборудования' },
+                { id: 2, text: 'Устранить недочеты (если нашли)' },
+                { id: 3, text: 'Оценить качество ремонта' },
+                { id: 4, text: 'Передать исполнительную документацию' },
+                { id: 5, text: 'Подписать акт сдачи-приемки' },
+                { id: 6, text: 'Закрыть наряд-допуск' },
+                { id: 7, text: 'Получить разрешение на пуск' }
+            ];
+
+            // правильный порядок (по порядку в массиве)
+            const correctOrder = stepsData.map(item => item.id);
+
+            // ---- DOM ----
+            const list = document.getElementById('stepsList');
+            const checkBtn = document.getElementById('checkBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const banner = document.getElementById('banner');
+
+            let currentOrder = [];
+
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            function initOrder() {
+                currentOrder = shuffleArray([...correctOrder]);
+            }
+
+            function render() {
+                let html = '';
+                currentOrder.forEach((id, index) => {
+                    const item = stepsData.find(s => s.id === id);
+                    html += `
+                        <div class="step-item" draggable="true" data-id="${id}" data-index="${index}">
+                            <span class="step-num">${index + 1}</span>
+                            <span>${item.text}</span>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+
+                document.querySelectorAll('.step-item').forEach(el => {
+                    el.classList.remove('correct', 'wrong');
+                    const icon = el.querySelector('.status-icon');
+                    if (icon) icon.remove();
+                });
+
+                attachEvents();
+            }
+
+            function attachEvents() {
+                const items = list.querySelectorAll('.step-item');
+
+                items.forEach(el => {
+                    el.removeEventListener('dragstart', handleDragStart);
+                    el.removeEventListener('dragend', handleDragEnd);
+                    el.removeEventListener('dragover', handleDragOver);
+                    el.removeEventListener('dragenter', handleDragEnter);
+                    el.removeEventListener('dragleave', handleDragLeave);
+                    el.removeEventListener('drop', handleDrop);
+
+                    el.addEventListener('dragstart', handleDragStart);
+                    el.addEventListener('dragend', handleDragEnd);
+                    el.addEventListener('dragover', handleDragOver);
+                    el.addEventListener('dragenter', handleDragEnter);
+                    el.addEventListener('dragleave', handleDragLeave);
+                    el.addEventListener('drop', handleDrop);
+                });
+            }
+
+            let draggedIndex = null;
+
+            function handleDragStart(e) {
+                draggedIndex = parseInt(this.dataset.index);
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', this.dataset.index);
+            }
+
+            function handleDragEnd(e) {
+                this.classList.remove('dragging');
+                list.querySelectorAll('.step-item').forEach(el => el.classList.remove('drag-over'));
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            }
+
+            function handleDragEnter(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            }
+
+            function handleDragLeave(e) {
+                this.classList.remove('drag-over');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+
+                const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                const toIndex = parseInt(this.dataset.index);
+
+                if (isNaN(fromIndex) || isNaN(toIndex) || fromIndex === toIndex) return;
+
+                const [moved] = currentOrder.splice(fromIndex, 1);
+                currentOrder.splice(toIndex, 0, moved);
+
+                banner.className = 'banner';
+                banner.style.display = 'none';
+
+                render();
+            }
+
+            function checkAnswers() {
+                let correct = 0;
+                let wrong = 0;
+
+                const items = list.querySelectorAll('.step-item');
+                items.forEach((el, index) => {
+                    const id = parseInt(el.dataset.id);
+                    const isCorrect = (id === correctOrder[index]);
+                    el.classList.remove('correct', 'wrong');
+                    if (isCorrect) {
+                        el.classList.add('correct');
+                        correct++;
+                    } else {
+                        el.classList.add('wrong');
+                        wrong++;
+                    }
+                });
+
+                const allCorrect = wrong === 0;
+                banner.className = 'banner show';
+                if (allCorrect) {
+                    banner.className = 'banner success show';
+                    banner.innerHTML = '✅ Отлично! Вы правильно расставили все этапы.';
+                } else {
+                    banner.className = 'banner fail show';
+                    banner.innerHTML =
+                        `❌ Есть ошибки. Правильно: ${correct} из ${correctOrder.length}. Карточки с ошибками выделены красным.`;
+                }
+            }
+
+            function resetAll() {
+                initOrder();
+                banner.className = 'banner';
+                banner.style.display = 'none';
+                render();
+            }
+
+            // ---- инициализация ----
+            initOrder();
+            render();
+
+            checkBtn.addEventListener('click', checkAnswers);
+            resetBtn.addEventListener('click', resetAll);
+
+        })();
+    </script>
+
+</body>
+</html>
